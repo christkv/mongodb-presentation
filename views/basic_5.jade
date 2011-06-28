@@ -1,0 +1,42 @@
+style 
+  form {
+    display:inline;
+  }  
+
+h1 Simple post form for location
+form(action = '/location', method = 'post')
+  h3 Description
+  textarea(type = 'text', name = 'description')= locals.location != null ? location.description : ''
+  h3 Address
+  input(type = 'text', name = 'address', value = locals.location != null ? location.address : '')
+  - if (locals.location != null)
+    input(type = 'hidden', value = 'put', name = '_method')
+    input(type = 'hidden', value = location._id.toString(), name = 'id')  
+  p
+  input(type = 'submit', value = locals.location != null ? 'Update' : 'Save')  
+- if (locations != null)
+  h1 Currently stored locations
+  table
+    thead
+      th Description
+      th Full Address
+      th Latitude
+      th Longtitude
+      th 
+    tbody
+      - each location in locations
+        tr
+          td= location.description  
+          td= location.geodata.formatted_address
+          td= location.geodata.geometry.location.lat
+          td= location.geodata.geometry.location.lng
+          td
+            form(action = '/location', method = 'post')
+              input(type = 'hidden', value = 'delete', name = '_method')
+              input(type = 'hidden', value = location._id.toString(), name = 'id')
+              input(type = 'submit', value='Delete')
+            form(action = '/location', method = 'post')
+              input(type = 'hidden', value = 'get', name = '_method')
+              input(type = 'hidden', value = location._id.toString(), name = 'id')
+              input(type = 'submit', value='Edit')
+            

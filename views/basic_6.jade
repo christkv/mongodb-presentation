@@ -1,0 +1,101 @@
+script(type = "text/javascript", src = "http://maps.google.com/maps/api/js?sensor=false")
+style 
+  form {
+    display:inline;
+  }  
+  
+  - each result in results
+    != "<script>"
+    != "  var myLatlng = new google.maps.LatLng(-25.363882,131.044922);"
+    != "  var marker = new google.maps.Marker({position: myLatlng,map: map, title:'result'});"
+    != "</script>"  
+
+!= "<script>"
+!= "  function initialize() {\n"
+- if (locals.results != null) 
+  != "    var latlng = new google.maps.LatLng(" + results[0].loc.lat + "," + results[0].loc.long + ");\n"
+- else
+  != "    var latlng = new google.maps.LatLng(-34.397, 150.644);\n"
+!= "    var myOptions = {\n"
+!= "      zoom: 8,\n"
+!= "      center: latlng, \n"
+!= "      mapTypeId: google.maps.MapTypeId.ROADMAP\n"
+!= "    };\n"
+!= "    var map = new google.maps.Map(document.getElementById('map_canvas'), myOptions);"
+- if (locals.results != null) 
+  - each result in results
+    != "    var myLatlng = new google.maps.LatLng(" + result.loc.lat + "," + result.loc.long + ");\n"
+    != "    var marker = new google.maps.Marker({position: myLatlng,map: map, title:'result'});\n"  
+!= "  };\n"
+!= "</script>"
+
+body(onload = "initialize()")
+
+  h1 Simple post form for location
+  form(action = '/location', method = 'post')
+    h3 Description
+    textarea(type = 'text', name = 'description')= locals.location != null ? location.description : ''
+    h3 Address
+    input(type = 'text', name = 'address', value = locals.location != null ? location.address : '')
+    - if (locals.location != null)
+      input(type = 'hidden', value = 'put', name = '_method')
+      input(type = 'hidden', value = location._id.toString(), name = 'id')  
+    p
+    input(type = 'submit', value = locals.location != null ? 'Update' : 'Save')  
+    p
+  hr  
+  p
+
+  div(style = "float:left; width:70%")
+    h1 Simple search form for geo
+    form(action = '/search', method = 'post')
+      h3 Search circle in feet
+      input(type = 'text', name = 'distance', size = "10", value = "0.001")
+      p
+      h3 Near address
+      input(type = 'text', name = 'address', size = "60")
+      input(type = 'submit', value = "Search")        
+      - if (locals.results != null)      
+        table
+          thead
+            th Description
+            th Full Address
+            th Latitude
+            th Longtitude
+            th 
+          tbody
+            - each result in results
+              tr
+                td= result.description  
+                td= result.geodata.formatted_address
+                td= result.geodata.geometry.location.lat
+                td= result.geodata.geometry.location.lng    
+  div(id = "map_canvas", style = "width:30%; height:30%; float:left; position:relative")  
+    
+  - if (locations != null)    
+    div(style = "width:100%; float:left")
+      hr  
+      h1 Currently stored locations
+      table
+        thead
+          th Description
+          th Full Address
+          th Latitude
+          th Longtitude
+          th 
+        tbody
+          - each location in locations
+            tr
+              td= location.description  
+              td= location.geodata.formatted_address
+              td= location.geodata.geometry.location.lat
+              td= location.geodata.geometry.location.lng
+              td
+                form(action = '/location', method = 'post')
+                  input(type = 'hidden', value = 'delete', name = '_method')
+                  input(type = 'hidden', value = location._id.toString(), name = 'id')
+                  input(type = 'submit', value='Delete')
+                form(action = '/location', method = 'post')
+                  input(type = 'hidden', value = 'get', name = '_method')
+                  input(type = 'hidden', value = location._id.toString(), name = 'id')
+                  input(type = 'submit', value='Edit')
